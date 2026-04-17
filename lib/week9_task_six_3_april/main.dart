@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:ex/week9_task_six_3_april/task_one/cars.dart';
+import 'cars.dart';
 
 void main() {
   List<Cars> myCars = [];
