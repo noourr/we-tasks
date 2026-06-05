@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:we_tassks/15_may/to_do_tile.dart';
+import 'package:we_tassks/database/user_db.dart';
 
 class ToDoHome extends StatefulWidget {
   const ToDoHome({super.key});
@@ -10,33 +11,59 @@ class ToDoHome extends StatefulWidget {
 
 class _ToDoHomeState extends State<ToDoHome> {
   final controller = TextEditingController();
-  void onSave() {
+  TasksDb db = TasksDb();
+  List todoList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTasks();
+  }
+
+  Future<void> _loadTasks() async {
+    final tasks = await db.getTasks();
     setState(() {
-      todoList.add([controller.text, false]);
-      controller.clear();
+      todoList = tasks
+          .map(
+            (t) => [
+              t['taskName'] as String,
+              (t['isCompleted'] as int) == 1,
+              t['tasks_id'] as int,
+            ],
+          )
+          .toList();
     });
-    Navigator.of(context).pop();
+  }
+
+  void onSave() async {
+    if (controller.text.trim().isNotEmpty) {
+      await db.insertTask(controller.text.trim(), false);
+      controller.clear();
+      _loadTasks();
+    }
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
   }
 
   void onCancel() {
     Navigator.of(context).pop();
   }
 
-  List todoList = [
-    ['build an app', false],
-    ['practic english', false],
-  ];
-
-  void cheekBox(bool? value, int index) {
+  void cheekBox(bool? value, int index) async {
     setState(() {
       todoList[index][1] = !todoList[index][1];
     });
+    int id = todoList[index][2];
+    await db.updateTask(id, todoList[index][1]);
   }
 
-  void deletTask(int index) {
+  void deletTask(int index) async {
+    int id = todoList[index][2];
     setState(() {
       todoList.removeAt(index);
     });
+    await db.deleteTask(id);
   }
 
   void createNewTask() {
@@ -48,7 +75,7 @@ class _ToDoHomeState extends State<ToDoHome> {
           content: SizedBox(
             height: 120,
             child: Column(
-              mainAxisAlignment: .spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 TextField(
                   controller: controller,
@@ -58,7 +85,7 @@ class _ToDoHomeState extends State<ToDoHome> {
                   ),
                 ),
                 Row(
-                  mainAxisAlignment: .end,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     MaterialButton(
                       onPressed: onSave,
@@ -106,7 +133,7 @@ class _ToDoHomeState extends State<ToDoHome> {
             onChg: (value) {
               cheekBox(value, index);
             },
-            deleteFunc: (BuildContext) {
+            deleteFunc: (context) {
               deletTask(index);
             },
           );
