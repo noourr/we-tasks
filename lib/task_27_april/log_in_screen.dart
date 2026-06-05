@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:we_tassks/database/user_db.dart';
 import 'package:we_tassks/task_27_april/navigate.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -13,6 +14,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController nameControl = TextEditingController();
   TextEditingController emailControl = TextEditingController();
   TextEditingController passwrodControl = TextEditingController();
+  Userdb db = Userdb();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(height: 50),
               MaterialButton(
                 onPressed: () {
+                  db.createDb();
                   if (key.currentState!.validate()) {
                     print('we are good ');
                     print(nameControl.text);
